@@ -1,2 +1,2 @@
 // main namespace pl = "public library"
-var pl = { m:{}, v:{}, c:{} };
+const pl = {m: {}, v: {}, c: {}};
