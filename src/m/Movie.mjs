@@ -10,19 +10,21 @@
  * @constructor
  * @param {{movieId: string, title: string, releaseDate: Date?}} slots
  */
-import {isNonEmptyString, isIntegerOrIntegerString, cloneObject}
+import {isNonEmptyString, cloneObject}
     from "../../lib/util.mjs";
 import {
     NoConstraintViolation, MandatoryValueConstraintViolation, RangeConstraintViolation,
-    IntervalConstraintViolation, UniquenessConstraintViolation
+    IntervalConstraintViolation, UniquenessConstraintViolation, StringLengthConstraintViolation
 }
     from "../../lib/errorTypes.mjs";
+import {formatDate} from "../../lib/myUtil.mjs";
+
 
 function Movie(slots) {
     // assign default values
-    this.movieId = "";   // string
-    this.title = "";  // string
-    this.releaseDate = Date;    // number (int)
+    this.movieId = "";
+    this.title = "";
+    this.releaseDate = "";
     // this.edition   number (int) optional
     // set properties only if constructor is invoked with an argument
     if (arguments.length > 0) {
@@ -55,8 +57,7 @@ Movie.checkMovieIdAsId = function (id) {
         if (!id) {
             validationResult = new MandatoryValueConstraintViolation(
                 "A value for the movie id must be provided!");
-        }
-        else if (Movie.instances[id]) {
+        } else if (Movie.instances[id]) {
             validationResult = new UniquenessConstraintViolation(
                 "There is already a movie record with this id!");
         } else {
@@ -78,10 +79,12 @@ Movie.checkTitle = function (t) {
         return new MandatoryValueConstraintViolation("A title must be provided!");
     } else if (!isNonEmptyString(t)) {
         return new RangeConstraintViolation("The title must be a non-empty string!");
-    } else {
-        //TODO max range 120
-        return new NoConstraintViolation();
     }
+    if (t.length > 120) {
+        return new StringLengthConstraintViolation("max length for the title is 120 characters")
+    }
+    return new NoConstraintViolation();
+
 };
 Movie.prototype.setTitle = function (t) {
     const validationResult = Movie.checkTitle(t);
@@ -92,19 +95,16 @@ Movie.prototype.setTitle = function (t) {
     }
 };
 Movie.checkReleaseDate = function (y) {
-    const MIN_DATE = new Date(1895 - 12 - 28);
-        if (isNaN(Date.parse(y))) {
+    const MIN_DATE = Date.parse("1895-12-28");
+    const MAX_DATE = new Date().setFullYear(new Date().getFullYear() + 1)
+    let date = Date.parse(y);
+    if (isNaN(date)) {
         return new RangeConstraintViolation("The value of releaseDate must be a date!");
-    } else {
-//        if (typeof y === "string") y = parseInt(y);
-        if (y < MIN_DATE) {
-            return new IntervalConstraintViolation(
-                "interval wrong"); //TODO check max date
-            //`The value of year must be between ${YEAR_FIRST_BOOK} and next year!`);
-        } else {
-            return new NoConstraintViolation();
-        }
     }
+    if (date < MIN_DATE || date > MAX_DATE) {
+        return new IntervalConstraintViolation(`The value of releaseDate must be between ${formatDate(MIN_DATE)} and next year!`);
+    }
+    return new NoConstraintViolation();
 };
 Movie.prototype.setReleaseDate = function (y) {
     const validationResult = Movie.checkReleaseDate(y);
