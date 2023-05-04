@@ -38,7 +38,12 @@
             <div><label>Movie ID: <input name="movieId" type="text"/></label></div>
             <div><label>Title: <input name="title" type="text"/></label></div>
             <div><label>Release Date: <input name="releaseDate" type="text"/></label></div>
-<!--            <div><label>Edition: <input name="edition" type="text"/></label></div>-->
+            <fieldset data-bind="movieRating">
+                <legend>movie Rating</legend>
+            </fieldset>
+            <fieldset data-bind="genres">
+                <legend>Genres</legend>
+            </fieldset>
             <div>
                 <button type="submit" name="commit">Save</button>
             </div>

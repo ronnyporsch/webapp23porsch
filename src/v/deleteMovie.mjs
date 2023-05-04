@@ -12,7 +12,8 @@ const formEl = document.forms['Movie'],
 // load all movie records
 Movie.retrieveAll();
 // set up the movie selection list
-fillSelectWithOptions( Movie.instances, selectMovieEl,"movieId", "title");
+fillSelectWithOptions( selectMovieEl, Movie.instances,
+    {keyProp:"movieId", displayProp:"title"});
 // Set an event handler for the submit/delete button
 deleteButton.addEventListener("click", function () {
     const movieId = selectMovieEl.value;

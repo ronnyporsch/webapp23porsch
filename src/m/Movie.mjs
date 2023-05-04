@@ -29,12 +29,12 @@ const MovieRatingEL = new Enumeration({"G":"General Audiences", "PG":"Parental G
     "PG13":"Not Under 13","R":"Restricted", "NC17":"Not Under 17"});
 const GenreEL = new Enumeration(["Action","Animation", "Comedy","Documentary", "Drama", "Family", "Film-Noir", "Horror", "Musical", "Romance"]);
 class Movie {
-    constructor({movieId, title, releaseDate}){//, rating, genres) {
+    constructor({movieId, title, releaseDate, movieRating, genres}) {
         this.movieId = movieId
         this.title = title
         this.releaseDate = releaseDate
-        // this.rating = rating;
-        // this.genres = genres;
+        this.movieRating = movieRating;
+        this.genres = genres;
     }
 
     /*********************************************************
@@ -45,6 +45,38 @@ class Movie {
         return this._movieId;
     }
 
+    set movieId(id) {
+        const validationResult = Movie.checkMovieIdAsId(id);
+        if (validationResult instanceof NoConstraintViolation) {
+            this._movieId = id;
+        } else {
+            throw validationResult;
+        }
+    };
+
+    static checkMovieId = function (id) {
+        if (!id) return new NoConstraintViolation();
+        if (!(/^\+?(0|[1-9]\d*)$/.test(id))) {
+            return new RangeConstraintViolation('movie id must be a positive integer!');
+        } else {
+            return new NoConstraintViolation();
+        }
+    };
+    static checkMovieIdAsId = function (id) {
+        let validationResult = Movie.checkMovieId(id);
+        if ((validationResult instanceof NoConstraintViolation)) {
+            if (!id) {
+                validationResult = new MandatoryValueConstraintViolation(
+                    "A value for the movie id must be provided!");
+            } else if (Movie.instances[id]) {
+                validationResult = new UniquenessConstraintViolation(
+                    "There is already a movie record with this id!");
+            } else {
+                validationResult = new NoConstraintViolation();
+            }
+        }
+        return validationResult;
+    };
 
     static checkMovieRating(rating) {
         if (!rating) return new NoConstraintViolation();
@@ -60,10 +92,14 @@ class Movie {
     set movieRating(rating) {
         const validationResult = Movie.checkMovieRating(rating);
         if (validationResult instanceof NoConstraintViolation) {
-            this.rating = parseInt(rating);
+            this._movieRating = parseInt(rating);
         } else {
             throw validationResult;
         }
+    }
+
+    get movieRating() {
+        return this._movieRating;
     }
 
     static checkGenre(genre) {
@@ -95,43 +131,16 @@ class Movie {
     set genres(genres) {
         const validationResult = Movie.checkGenres(genres);
         if (validationResult instanceof NoConstraintViolation) {
-            this.genres = genres;
+            this._genres = genres;
         } else {
             throw validationResult;
         }
     }
 
-    static checkMovieId = function (id) {
-        if (!id) return new NoConstraintViolation();
-        if (!(/^\+?(0|[1-9]\d*)$/.test(id))) {
-            return new RangeConstraintViolation('movie id must be a positive integer!');
-        } else {
-            return new NoConstraintViolation();
-        }
-    };
-    static checkMovieIdAsId = function (id) {
-        let validationResult = Movie.checkMovieId(id);
-        if ((validationResult instanceof NoConstraintViolation)) {
-            if (!id) {
-                validationResult = new MandatoryValueConstraintViolation(
-                    "A value for the movie id must be provided!");
-            } else if (Movie.instances[id]) {
-                validationResult = new UniquenessConstraintViolation(
-                    "There is already a movie record with this id!");
-            } else {
-                validationResult = new NoConstraintViolation();
-            }
-        }
-        return validationResult;
-    };
-    set movieId(id) {
-        const validationResult = Movie.checkMovieIdAsId(id);
-        if (validationResult instanceof NoConstraintViolation) {
-            this._movieId = id;
-        } else {
-            throw validationResult;
-        }
-    };
+    get genres() {
+        return this._genres
+    }
+
     static checkTitle = function (t) {
         if (!t) {
             return new MandatoryValueConstraintViolation("A title must be provided!");
@@ -188,8 +197,8 @@ class Movie {
      *  Serialize movie object
      */
     toString() {
-        let movieStr = `Movie{ ID: ${this.movieId}, title: ${this.title}`;
-        if (this.releaseDate) movieStr += `, edition: ${this.releaseDate}`;
+        let movieStr = `Movie{ ID: ${this.movieId}, title: ${this.title}, movieRating: ${this.movieRating}, genres: ${this.genres.toString()}`;
+        if (this.releaseDate) movieStr += `, releaseDate: ${this.releaseDate}`;
         return movieStr;
     };
 
@@ -248,6 +257,14 @@ Movie.update = function (slots) {
         if (movie.releaseDate !== new Date(slots.releaseDate)) {
             movie.releaseDate = slots.releaseDate;
             updatedProperties.push("releaseDate");
+        }
+        if (movie.movieRating !== slots.movieRating) {
+            movie.movieRating = slots.movieRating;
+            updatedProperties.push("movieRating");
+        }
+        if (!movie.genres.isEqualTo( slots.genres)) {
+            movie.genres = slots.genres;
+            updatedProperties.push("genres");
         }
         // if (slots.edition && parseInt(slots.edition) !== movie.edition) {
         //     // slots.edition has a non-empty value that is new
