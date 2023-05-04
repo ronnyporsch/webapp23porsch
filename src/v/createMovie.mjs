@@ -3,20 +3,23 @@
  * @author Gerd Wagner
  */
 import Movie from "../m/Movie.mjs";
+import { fillSelectWithOptions, createChoiceWidget } from "../../lib/util.mjs";
 
 const formEl = document.forms["Movie"],
+    movieRatingEl = formEl["movieRating"],
+    genresEl = formEl["genres"],
     saveButton = formEl["commit"];
 // load all book records
 Movie.retrieveAll();
 // add event listeners for responsive validation
-formEl.movieId.addEventListener("input", function () {formEl.movieId.setCustomValidity(
-    Movie.checkMovieIdAsId( formEl.movieId.value).message);
+formEl.movieId.addEventListener("input", function () {
+    formEl.movieId.setCustomValidity(Movie.checkMovieIdAsId( formEl.movieId.value).message);
 });
-formEl.title.addEventListener("input", function () {formEl.title.setCustomValidity(
-    Movie.checkTitle( formEl.title.value).message);
+formEl.title.addEventListener("input", function () {
+    formEl.title.setCustomValidity( Movie.checkTitle( formEl.title.value).message);
 });
-formEl.releaseDate.addEventListener("input", function () {formEl.releaseDate.setCustomValidity(
-    Movie.checkReleaseDate( formEl.releaseDate.value).message);
+formEl.releaseDate.addEventListener("input", function () {
+    formEl.releaseDate.setCustomValidity(Movie.checkReleaseDate( formEl.releaseDate.value).message);
 });
 // formEl.edition.addEventListener("input", function () {formEl.edition.setCustomValidity(
 //     Movie.checkEdition( formEl.edition.value).message);

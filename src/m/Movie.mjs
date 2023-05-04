@@ -10,27 +10,200 @@
  * @constructor
  * @param {{movieId: string, title: string, releaseDate: Date?}} slots
  */
-import {isNonEmptyString, cloneObject}
-    from "../../lib/util.mjs";
+import {cloneObject, isIntegerOrIntegerString, isNonEmptyString} from "../../lib/util.mjs";
 import {
-    NoConstraintViolation, MandatoryValueConstraintViolation, RangeConstraintViolation,
-    IntervalConstraintViolation, UniquenessConstraintViolation, StringLengthConstraintViolation
-}
-    from "../../lib/errorTypes.mjs";
+    IntervalConstraintViolation,
+    MandatoryValueConstraintViolation,
+    NoConstraintViolation,
+    RangeConstraintViolation,
+    StringLengthConstraintViolation,
+    UniquenessConstraintViolation
+} from "../../lib/errorTypes.mjs";
 import {formatDate} from "../../lib/myUtil.mjs";
+import Enumeration from "../../lib/Enumeration.mjs";
+
+/**
+ * Define three Enumerations
+ */
+const MovieRatingEL = new Enumeration({"G":"General Audiences", "PG":"Parental Guidance",
+    "PG13":"Not Under 13","R":"Restricted", "NC17":"Not Under 17"});
+const GenreEL = new Enumeration(["Action","Animation", "Comedy","Documentary", "Drama", "Family", "Film-Noir", "Horror", "Musical", "Romance"]);
+class Movie {
+    constructor({movieId, title, releaseDate}){//, rating, genres) {
+        this.movieId = movieId
+        this.title = title
+        this.releaseDate = releaseDate
+        // this.rating = rating;
+        // this.genres = genres;
+    }
+
+    /*********************************************************
+     ***  Checks and Setters  *********************************
+     **********************************************************/
+
+    get movieId() {
+        return this._movieId;
+    }
 
 
-function Movie(slots) {
-    // assign default values
-    this.movieId = "";
-    this.title = "";
-    this.releaseDate = "";
-    // this.edition   number (int) optional
-    // set properties only if constructor is invoked with an argument
-    if (arguments.length > 0) {
-        this.setMovieId(slots.movieId);
-        this.setTitle(slots.title);
-        if (slots.releaseDate) this.setReleaseDate(slots.releaseDate);  // optional
+    static checkMovieRating(rating) {
+        if (!rating) return new NoConstraintViolation();
+        if (!isIntegerOrIntegerString(rating) ||
+            parseInt(rating) < 1 || parseInt(rating) > MovieRatingEL.MAX) {
+            return new RangeConstraintViolation(
+                `Invalid value for movie rating: ${rating}`);
+        } else {
+            return new NoConstraintViolation();
+        }
+    }
+
+    set movieRating(rating) {
+        const validationResult = Movie.checkMovieRating(rating);
+        if (validationResult instanceof NoConstraintViolation) {
+            this.rating = parseInt(rating);
+        } else {
+            throw validationResult;
+        }
+    }
+
+    static checkGenre(genre) {
+        if (!Number.isInteger(genre) || genre < 1 ||
+            genre > GenreEL.MAX) {
+            return new RangeConstraintViolation(
+                `Invalid value for genre: ${genre}`);
+        } else {
+            return new NoConstraintViolation();
+        }
+    }
+
+    static checkGenres(genres) {
+        if (!genres || (Array.isArray(genres) && genres.length === 0)) {
+            return new MandatoryValueConstraintViolation("at least one genre has to be provided!")
+        } else if (!Array.isArray(genres)) {
+            return new RangeConstraintViolation(
+                "The value of genres must be a list/array!");
+        } else {
+            for (const i of genres.keys()) {
+                const validationResult = Movie.checkGenre(genres[i]);
+                if (!(validationResult instanceof NoConstraintViolation)) {
+                    return validationResult;
+                }
+            }
+            return new NoConstraintViolation();
+        }
+    }
+    set genres(genres) {
+        const validationResult = Movie.checkGenres(genres);
+        if (validationResult instanceof NoConstraintViolation) {
+            this.genres = genres;
+        } else {
+            throw validationResult;
+        }
+    }
+
+    static checkMovieId = function (id) {
+        if (!id) return new NoConstraintViolation();
+        if (!(/^\+?(0|[1-9]\d*)$/.test(id))) {
+            return new RangeConstraintViolation('movie id must be a positive integer!');
+        } else {
+            return new NoConstraintViolation();
+        }
+    };
+    static checkMovieIdAsId = function (id) {
+        let validationResult = Movie.checkMovieId(id);
+        if ((validationResult instanceof NoConstraintViolation)) {
+            if (!id) {
+                validationResult = new MandatoryValueConstraintViolation(
+                    "A value for the movie id must be provided!");
+            } else if (Movie.instances[id]) {
+                validationResult = new UniquenessConstraintViolation(
+                    "There is already a movie record with this id!");
+            } else {
+                validationResult = new NoConstraintViolation();
+            }
+        }
+        return validationResult;
+    };
+    set movieId(id) {
+        const validationResult = Movie.checkMovieIdAsId(id);
+        if (validationResult instanceof NoConstraintViolation) {
+            this._movieId = id;
+        } else {
+            throw validationResult;
+        }
+    };
+    static checkTitle = function (t) {
+        if (!t) {
+            return new MandatoryValueConstraintViolation("A title must be provided!");
+        } else if (!isNonEmptyString(t)) {
+            return new RangeConstraintViolation("The title must be a non-empty string!");
+        }
+        if (t.length > 120) {
+            return new StringLengthConstraintViolation("max length for the title is 120 characters")
+        }
+        return new NoConstraintViolation();
+
+    };
+    set title(t) {
+        let validationResult = Movie.checkTitle(t);
+        if (validationResult instanceof NoConstraintViolation) {
+            this._title = t;
+        } else {
+            throw validationResult;
+        }
+    };
+
+    get title() {
+        return this._title
+    }
+    static checkReleaseDate = function (y) {
+        const MIN_DATE = Date.parse("1895-12-28");
+        const MAX_DATE = new Date().setFullYear(new Date().getFullYear() + 1)
+        let date = Date.parse(y);
+        if (isNaN(date)) {
+            return new RangeConstraintViolation("The value of releaseDate must be a date!");
+        }
+        if (date < MIN_DATE || date > MAX_DATE) {
+            return new IntervalConstraintViolation(`The value of releaseDate must be between ${formatDate(MIN_DATE)} and next year!`);
+        }
+        return new NoConstraintViolation();
+    };
+    set releaseDate(y) {
+        const validationResult = Movie.checkReleaseDate(y);
+        if (validationResult instanceof NoConstraintViolation) {
+            this._releaseDate = new Date(y);
+        } else {
+            throw validationResult;
+        }
+    };
+
+    get releaseDate() {
+        return this._releaseDate;
+    }
+
+    /*********************************************************
+     ***  Other Instance-Level Methods  ***********************
+     **********************************************************/
+    /**
+     *  Serialize movie object
+     */
+    toString() {
+        let movieStr = `Movie{ ID: ${this.movieId}, title: ${this.title}`;
+        if (this.releaseDate) movieStr += `, edition: ${this.releaseDate}`;
+        return movieStr;
+    };
+
+    toJSON() {  // is invoked by JSON.stringify
+        const rec = {};
+        for (let p of Object.keys( this)) {
+            // copy only property slots with underscore prefix
+            if (p.charAt(0) === "_") {
+                // remove underscore prefix
+                rec[p.substr(1)] = this[p];
+            }
+            // rec[p] = this[p];
+        }
+        return rec;
     }
 }
 
@@ -38,114 +211,8 @@ function Movie(slots) {
  ***  Class-level ("static") properties  ******************
  **********************************************************/
 // initially an empty collection (in the form of a map)
-Movie.instances = {};
+Movie.instances= {};
 
-/*********************************************************
- ***  Checks and Setters  *********************************
- **********************************************************/
-Movie.checkMovieId = function (id) {
-    if (!id) return new NoConstraintViolation();
-    if (!(/^\+?(0|[1-9]\d*)$/.test(id))) {
-        return new RangeConstraintViolation('movie id must be a positive integer!');
-    } else {
-        return new NoConstraintViolation();
-    }
-};
-Movie.checkMovieIdAsId = function (id) {
-    let validationResult = Movie.checkMovieId(id);
-    if ((validationResult instanceof NoConstraintViolation)) {
-        if (!id) {
-            validationResult = new MandatoryValueConstraintViolation(
-                "A value for the movie id must be provided!");
-        } else if (Movie.instances[id]) {
-            validationResult = new UniquenessConstraintViolation(
-                "There is already a movie record with this id!");
-        } else {
-            validationResult = new NoConstraintViolation();
-        }
-    }
-    return validationResult;
-};
-Movie.prototype.setMovieId = function (id) {
-    const validationResult = Movie.checkMovieIdAsId(id);
-    if (validationResult instanceof NoConstraintViolation) {
-        this.movieId = id;
-    } else {
-        throw validationResult;
-    }
-};
-Movie.checkTitle = function (t) {
-    if (!t) {
-        return new MandatoryValueConstraintViolation("A title must be provided!");
-    } else if (!isNonEmptyString(t)) {
-        return new RangeConstraintViolation("The title must be a non-empty string!");
-    }
-    if (t.length > 120) {
-        return new StringLengthConstraintViolation("max length for the title is 120 characters")
-    }
-    return new NoConstraintViolation();
-
-};
-Movie.prototype.setTitle = function (t) {
-    const validationResult = Movie.checkTitle(t);
-    if (validationResult instanceof NoConstraintViolation) {
-        this.title = t;
-    } else {
-        throw validationResult;
-    }
-};
-Movie.checkReleaseDate = function (y) {
-    const MIN_DATE = Date.parse("1895-12-28");
-    const MAX_DATE = new Date().setFullYear(new Date().getFullYear() + 1)
-    let date = Date.parse(y);
-    if (isNaN(date)) {
-        return new RangeConstraintViolation("The value of releaseDate must be a date!");
-    }
-    if (date < MIN_DATE || date > MAX_DATE) {
-        return new IntervalConstraintViolation(`The value of releaseDate must be between ${formatDate(MIN_DATE)} and next year!`);
-    }
-    return new NoConstraintViolation();
-};
-Movie.prototype.setReleaseDate = function (y) {
-    const validationResult = Movie.checkReleaseDate(y);
-    if (validationResult instanceof NoConstraintViolation) {
-        this.releaseDate = new Date(y);
-    } else {
-        throw validationResult;
-    }
-};
-// Movie.checkEdition = function (e) {
-//     // the "edition" attribute is optional
-//     if (!e || e === "") return new NoConstraintViolation();
-//     else {
-//         if (!isIntegerOrIntegerString(e) || parseInt(e) < 1) {
-//             return new RangeConstraintViolation(
-//                 "The value of edition must be a positive integer!");
-//         } else {
-//             return new NoConstraintViolation();
-//         }
-//     }
-// };
-// Movie.prototype.setEdition = function (e) {
-//     let validationResult = Movie.checkEdition(e);
-//     if (validationResult instanceof NoConstraintViolation) {
-//         if (!e || e === "") delete this.edition;  // unset optional property
-//         else this.edition = parseInt(e);
-//     } else {
-//         throw validationResult;
-//     }
-// };
-/*********************************************************
- ***  Other Instance-Level Methods  ***********************
- **********************************************************/
-/**
- *  Serialize movie object
- */
-Movie.prototype.toString = function () {
-    let movieStr = `Movie{ ID: ${this.movieId}, title: ${this.title}`;
-    if (this.releaseDate) movieStr += `, edition: ${this.releaseDate}`;
-    return movieStr;
-};
 /*********************************************************
  ***  Class-level ("static") storage management methods ***
  **********************************************************/
@@ -175,11 +242,11 @@ Movie.update = function (slots) {
         objectBeforeUpdate = cloneObject(movie);
     try {
         if (movie.title !== slots.title) {
-            movie.setTitle(slots.title);
+            movie.title = slots.title;
             updatedProperties.push("title");
         }
         if (movie.releaseDate !== new Date(slots.releaseDate)) {
-            movie.setReleaseDate(slots.releaseDate);
+            movie.releaseDate = slots.releaseDate;
             updatedProperties.push("releaseDate");
         }
         // if (slots.edition && parseInt(slots.edition) !== movie.edition) {
@@ -252,11 +319,10 @@ Movie.retrieveAll = function () {
  *  Save all movie objects
  */
 Movie.saveAll = function () {
-    let moviesString = "", error = false;
+    let error = false;
     const nmrOfMovies = Object.keys(Movie.instances).length;
     try {
-        moviesString = JSON.stringify(Movie.instances);
-        localStorage["movies"] = moviesString;
+        localStorage["movies"] = JSON.stringify(Movie.instances);
     } catch (e) {
         alert("Error when writing to Local Storage\n" + e);
         error = true;
@@ -310,3 +376,4 @@ Movie.clearData = function () {
 };
 
 export default Movie;
+export {MovieRatingEL, GenreEL}
