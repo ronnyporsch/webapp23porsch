@@ -78,6 +78,10 @@ createFormEl.movieId.addEventListener("input", function () {
     createFormEl.movieId.setCustomValidity(
         Movie.checkMovieIdAsId(createFormEl["movieId"].value).message);
 });
+createFormEl.releaseDate.addEventListener("input", function () {
+    createFormEl.releaseDate.setCustomValidity(
+        Movie.checkReleaseDate(createFormEl["releaseDate"].value).message);
+});
 /* SIMPLIFIED/MISSING CODE: add event listeners for responsive
    validation on user input with Movie.checkTitle and checkYear */
 
@@ -93,6 +97,8 @@ createFormEl["commit"].addEventListener("click", function () {
     // check all input fields and show error messages
     createFormEl.movieId.setCustomValidity(
         Movie.checkMovieIdAsId(slots.movieId).message);
+    createFormEl.releaseDate.setCustomValidity(
+        Movie.checkReleaseDate(slots.releaseDate).message);
     /* SIMPLIFIED CODE: no before-submit validation of name */
     // get the list of selected actors
     const selAuthOptions = createFormEl.selectActors.selectedOptions;
@@ -157,6 +163,7 @@ updSelMovieEl.addEventListener("change", function () {
         selectActorsWidget.innerHTML = "";
         saveButton.disabled = true;
     }
+
 });
 // handle Save button click events
 updateFormEl["commit"].addEventListener("click", function () {
@@ -170,6 +177,8 @@ updateFormEl["commit"].addEventListener("click", function () {
         releaseDate: updateFormEl["releaseDate"].value,
         directorId: updateFormEl["selectDirector"].value
     };
+    updateFormEl.releaseDate.setCustomValidity(
+        Movie.checkReleaseDate(slots.releaseDate).message);
     // add event listeners for responsive validation
     /* MISSING CODE */
     // commit the update only if all form field values are valid
