@@ -31,7 +31,7 @@ class Person {
 
     static checkPersonId(id) {
         if (!id) {
-            return new NoConstraintViolation();  // may be optional as an IdRef
+            return new MandatoryValueConstraintViolation("person id is mandatory")
         } else {
             id = parseInt(id);  // convert to integer
             if (isNaN(id) || !Number.isInteger(id) || id < 1) {
@@ -84,9 +84,9 @@ class Person {
         return this._name;
     }
 
-    static checkName( n) {
+    static checkName(n) {
         if (!n) {
-            return new NoConstraintViolation();  // not mandatory
+            return new MandatoryValueConstraintViolation("name is mandatory!")
         } else {
             if (typeof n !== "string" || n.trim() === "") {
                 return new RangeConstraintViolation(
@@ -96,7 +96,8 @@ class Person {
             }
         }
     }
-    static checkNameAsId( n) {
+
+    static checkNameAsId(n) {
         var validationResult = Person.checkName(n);
         if ((validationResult instanceof NoConstraintViolation)) {
             if (!n) {
@@ -109,8 +110,9 @@ class Person {
         }
         return validationResult;
     }
-    static checkNameAsIdRef( n) {
-        var validationResult = Person.checkName( n);
+
+    static checkNameAsIdRef(n) {
+        var validationResult = Person.checkName(n);
         if ((validationResult instanceof NoConstraintViolation) && n) {
             if (!Person.instances[n]) {
                 validationResult = new ReferentialIntegrityConstraintViolation(
@@ -119,8 +121,9 @@ class Person {
         }
         return validationResult;
     }
-    set name( n) {
-        var constraintViolation = Person.checkName( n);
+
+    set name(n) {
+        var constraintViolation = Person.checkName(n);
         if (constraintViolation instanceof NoConstraintViolation) {
             this._name = n;
         } else {
@@ -196,7 +199,13 @@ Person.destroy = function (personId) {
     // delete all dependent movie records
     for (const movieId of Object.keys(Movie.instances)) {
         const movie = Movie.instances[movieId];
-        if (personId in movie.persons) delete movie.persons[personId];
+        if (parseInt(personId) === movie.director?.personId) {
+            delete movie.director
+        }
+        if (personId in movie.actors) delete movie.actors[personId];
+        if (!movie.actors || Object.keys(movie.actors).length === 0) {
+            delete Movie.instances[movieId]
+        }
     }
     // delete the person object
     delete Person.instances[personId];
