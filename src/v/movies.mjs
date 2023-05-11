@@ -7,7 +7,7 @@
  ***************************************************************/
 import Person from "../m/Person.mjs";
 import Movie from "../m/Movie.mjs";
-import { fillSelectWithOptions, createListFromMap, createMultiSelectionWidget }
+import {fillSelectWithOptions, createListFromMap, createMultiSelectionWidget}
     from "../../lib/util.mjs";
 
 /***************************************************************
@@ -42,15 +42,15 @@ document.getElementById("RetrieveAndListAll")
         document.getElementById("Movie-R").style.display = "block";
         const tableBodyEl = document.querySelector("section#Movie-R>table>tbody");
         tableBodyEl.innerHTML = "";  // drop old content
-        for (const key of Object.keys( Movie.instances)) {
+        for (const key of Object.keys(Movie.instances)) {
             const movie = Movie.instances[key];
             // create list of actors for this movie
-            const authListEl = createListFromMap( movie.actors, "name");
+            const authListEl = createListFromMap(movie.actors, "name");
             const row = tableBodyEl.insertRow();
             row.insertCell().textContent = movie.movieId;
             row.insertCell().textContent = movie.title;
             row.insertCell().textContent = movie.year;
-            row.insertCell().appendChild( authListEl);
+            row.insertCell().appendChild(authListEl);
             // if the movie has a director, show its name
             row.insertCell().textContent =
                 movie.director ? movie.director.name : "";
@@ -65,9 +65,9 @@ const createFormEl = document.querySelector("section#Movie-C > form"),
     selectDirectorEl = createFormEl["selectDirector"];
 document.getElementById("Create").addEventListener("click", function () {
     // set up a single selection list for selecting a director
-    fillSelectWithOptions( selectDirectorEl, Person.instances, "personId", {displayProp: "name"});
+    fillSelectWithOptions(selectDirectorEl, Person.instances, "personId", {displayProp: "name"});
     // set up a multiple selection list for selecting actors
-    fillSelectWithOptions( selectActorsEl, Person.instances,
+    fillSelectWithOptions(selectActorsEl, Person.instances,
         "personId", {displayProp: "name"});
     document.getElementById("Movie-M").style.display = "none";
     document.getElementById("Movie-C").style.display = "block";
@@ -76,7 +76,7 @@ document.getElementById("Create").addEventListener("click", function () {
 // set up event handlers for responsive constraint validation
 createFormEl.movieId.addEventListener("input", function () {
     createFormEl.movieId.setCustomValidity(
-        Movie.checkMovieIdAsId( createFormEl["movieId"].value).message);
+        Movie.checkMovieIdAsId(createFormEl["movieId"].value).message);
 });
 /* SIMPLIFIED/MISSING CODE: add event listeners for responsive
    validation on user input with Movie.checkTitle and checkYear */
@@ -92,7 +92,7 @@ createFormEl["commit"].addEventListener("click", function () {
     };
     // check all input fields and show error messages
     createFormEl.movieId.setCustomValidity(
-        Movie.checkMovieIdAsId( slots.movieId).message);
+        Movie.checkMovieIdAsId(slots.movieId).message);
     /* SIMPLIFIED CODE: no before-submit validation of name */
     // get the list of selected actors
     const selAuthOptions = createFormEl.selectActors.selectedOptions;
@@ -104,9 +104,9 @@ createFormEl["commit"].addEventListener("click", function () {
     if (createFormEl.checkValidity()) {
         // construct a list of actor ID references
         for (const opt of selAuthOptions) {
-            slots.actorIdRefs.push( opt.value);
+            slots.actorIdRefs.push(opt.value);
         }
-        Movie.add( slots);
+        Movie.add(slots);
     }
 });
 
@@ -119,7 +119,7 @@ document.getElementById("Update").addEventListener("click", function () {
     // reset selection list (drop its previous contents)
     updSelMovieEl.innerHTML = "";
     // populate the selection list
-    fillSelectWithOptions( updSelMovieEl, Movie.instances,
+    fillSelectWithOptions(updSelMovieEl, Movie.instances,
         "movieId", {displayProp: "title"});
     document.getElementById("Movie-M").style.display = "none";
     document.getElementById("Movie-U").style.display = "block";
@@ -140,9 +140,9 @@ updSelMovieEl.addEventListener("change", function () {
         updateFormEl["title"].value = movie.title;
         // updateFormEl["year"].value = movie.year;
         // set up the associated director selection list
-        fillSelectWithOptions( selectDirectorEl, Person.instances, "personId", {displayProp: "name"});
+        fillSelectWithOptions(selectDirectorEl, Person.instances, "personId", {displayProp: "name"});
         // set up the associated actors selection widget
-        createMultiSelectionWidget( selectActorsWidget, movie.actors,
+        createMultiSelectionWidget(selectActorsWidget, movie.actors,
             Person.instances, "personId", "name", 1);  // minCard=1
         // assign associated director as the selected option to select element
         if (movie.director) {
@@ -175,13 +175,13 @@ updateFormEl["commit"].addEventListener("click", function () {
     // commit the update only if all form field values are valid
     if (updateFormEl.checkValidity()) {
         // construct actorIdRefs-ToAdd/ToRemove lists
-        const actorIdRefsToAdd=[], actorIdRefsToRemove=[];
+        const actorIdRefsToAdd = [], actorIdRefsToRemove = [];
         for (const actorItemEl of selectedActorsListEl.children) {
             if (actorItemEl.classList.contains("removed")) {
-                actorIdRefsToRemove.push( actorItemEl.getAttribute("data-value"));
+                actorIdRefsToRemove.push(actorItemEl.getAttribute("data-value"));
             }
             if (actorItemEl.classList.contains("added")) {
-                actorIdRefsToAdd.push( actorItemEl.getAttribute("data-value"));
+                actorIdRefsToAdd.push(actorItemEl.getAttribute("data-value"));
             }
         }
         // if the add/remove list is non-empty, create a corresponding slot
@@ -191,7 +191,7 @@ updateFormEl["commit"].addEventListener("click", function () {
         if (actorIdRefsToAdd.length > 0) {
             slots.actorIdRefsToAdd = actorIdRefsToAdd;
         }
-        Movie.update( slots);
+        Movie.update(slots);
         // update the movie selection list's option element
         updSelMovieEl.options[updSelMovieEl.selectedIndex].text = slots.title;
         // drop widget content
@@ -208,7 +208,7 @@ document.getElementById("Delete").addEventListener("click", function () {
     // reset selection list (drop its previous contents)
     delSelMovieEl.innerHTML = "";
     // populate the selection list
-    fillSelectWithOptions( delSelMovieEl, Movie.instances,
+    fillSelectWithOptions(delSelMovieEl, Movie.instances,
         "movieId", {displayProp: "title"});
     document.getElementById("Movie-M").style.display = "none";
     document.getElementById("Movie-D").style.display = "block";
@@ -219,9 +219,9 @@ deleteFormEl["commit"].addEventListener("click", function () {
     const movieIdRef = delSelMovieEl.value;
     if (!movieIdRef) return;
     if (confirm("Do you really want to delete this movie?")) {
-        Movie.destroy( movieIdRef);
+        Movie.destroy(movieIdRef);
         // remove deleted movie from select options
-        delSelMovieEl.remove( delSelMovieEl.selectedIndex);
+        delSelMovieEl.remove(delSelMovieEl.selectedIndex);
     }
 });
 
