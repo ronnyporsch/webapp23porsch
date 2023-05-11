@@ -143,7 +143,7 @@ updSelMovieEl.addEventListener("change", function () {
         fillSelectWithOptions( selectDirectorEl, Person.instances, "personId", {displayProp: "name"});
         // set up the associated actors selection widget
         createMultiSelectionWidget( selectActorsWidget, movie.actors,
-            Person.instances, "actorId", "name", 1);  // minCard=1
+            Person.instances, "personId", "name", 1);  // minCard=1
         // assign associated director as the selected option to select element
         if (movie.director) {
             updateFormEl["selectDirector"].value = movie.director.name;

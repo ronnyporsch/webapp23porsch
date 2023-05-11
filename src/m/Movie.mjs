@@ -208,13 +208,13 @@ class Movie {
         return this._director;
     }
 
-    static checkDirector(publisher_id) {
+    static checkDirector(director_id) {
         var validationResult = null;
-        if (!publisher_id) {
+        if (!director_id) {
             validationResult = new NoConstraintViolation();  // optional
         } else {
             // invoke foreign key constraint check
-            validationResult = Person.checkNameAsIdRef(publisher_id);
+            validationResult = Person.checkPersonIdAsIdRef(director_id);
         }
         return validationResult;
     }
@@ -224,11 +224,12 @@ class Movie {
             delete this._director;
         } else {
             // p can be an ID reference or an object reference
-            const directorId = (typeof p !== "object") ? p : p.personId;
-            const validationResult = Movie.checkDirector(directorId);
+            const director_id = (typeof p !== "object") ? parseInt(p) : p.personId;
+            const validationResult = Movie.checkDirector(director_id);
             if (validationResult instanceof NoConstraintViolation) {
                 // create the new director reference
-                this._director = Person.instances[directorId];
+                const key = String(director_id)
+                this._director = Person.instances[key];
             } else {
                 throw validationResult;
             }
@@ -365,6 +366,23 @@ Movie.update = function (slots) {
         if (movie.movieRating !== slots.movieRating) {
             movie.movieRating = slots.movieRating;
             updatedProperties.push("movieRating");
+        }
+        if (slots.directorId && (!movie.director && slots.directorId ||
+            movie.director && movie.director.name !== slots.directorId)) {
+            movie.director =slots.directorId;
+            updatedProperties.push("director");
+        }
+        if (slots.actorIdRefsToAdd) {
+            updatedProperties.push("actors(added)");
+            for (const actorIdRef of slots.actorIdRefsToAdd) {
+                movie.addActor( actorIdRef);
+            }
+        }
+        if (slots.actorIdRefsToRemove) {
+            updatedProperties.push("actors(removed)");
+            for (const actor_id of slots.actorIdRefsToRemove) {
+                movie.removeActor( actor_id);
+            }
         }
         // if (!movie.genres.isEqualTo(slots.genres)) {
         //     movie.genres = slots.genres;
