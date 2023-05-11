@@ -132,7 +132,7 @@ footer div.foot-content {
    ========================================================================== */
 footer div.foot-content {
     font-size: smaller;
-    /' margin: 2em auto; */
+    /* margin: 2em auto; */
 }
 footer div.foot-content a {
     color: white;
@@ -149,21 +149,34 @@ table th {
     background: aliceblue;
 }
 
-main div.two-col-menu menu {
+ul.menu {
+    width: 20em;
+    text-align: center;
+    border: 1px solid black;
+    padding: 8px;
+    border-radius: 5px;
+}
+div.two-col-menu ul.menu {
     display: inline-block;
     vertical-align: top;
-    padding: 0;
     margin: 0;
     margin-left: 3em;
 }
-main div.two-col-menu menu > li {
+ul.menu li {
     list-style: none;
-    /* height: 1.5em; */
-    margin: 3px 0;
+    height: 1.5em;
+    margin: 0.5em auto;
 }
-/*main div.two-col-menu menu button {
-    width: 5em;
-}*/
+div.two-col-menu ul.menu > li {
+    /* height: 1.5em; */
+    margin-bottom: 0.5em;
+}
+ul.menu li button {
+    width: 20em;
+}
+div.two-col-menu ul.menu button {
+    width: 12em;
+}
 
 form :invalid {
     box-shadow: none;  /* neutralizing FF */
@@ -184,22 +197,24 @@ form > div > label {
 form > div.field-group > label {
     display: inline-block;
 }
-form > div.widget > label {
-    display: inline;
-}
-form > div.widget > div {
-    display: inline-block;
-}
-form > div.widget > div,
-  form > div > label > input[type="text"],
+form > div > label > input[type="text"],
   form > div > label > textarea,
   form > div > label > input[type="checkbox"],
   form > div > label > select,
-  form > div > label > output {
+  form > div > label > output,
+  form > div > div.MultiSelectionWidget {
     position: absolute;
     left: 11em;
 }
-form > div  > button {
+/* the height of multi-line widgets must be limited */
+form > div.select-many {
+    height: 6em;
+}
+form > div.widget {
+    height: 11em;
+}
+
+form > div > button {
     margin-right: 0.5em;
 }
 
@@ -214,20 +229,12 @@ form > fieldset > label > input[type="checkbox"] {
     margin-right: 0.5em;
 }
 
-/* the height of multi-line elements must be limited */
-form > div.select-many {
-    height: 6em;
-}
-form > div.widget {
-    height: 8em;
-}
-
-/* Association List Widget */
+/*  Multiple Choice Widget */
 form div.MultiSelectionWidget {
     outline: solid grey 1px;
     padding: 5px;
-    max-width: 30em;
-    max-height: 8em;  /* of the widget contaner */
+    max-width: 21em;
+    max-height: 10em;  /* of the widget container */
 }
 form div.MultiSelectionWidget > ul {
     padding-left: 8px;
@@ -241,8 +248,8 @@ form div.MultiSelectionWidget > ul > li {
 form div.MultiSelectionWidget > ul > li > button {
     float: right;
     margin-left: 0.5em;
-    font-size: 80%;
-    vertical-align: middle;
+    font-size: 70%;
+    /* vertical-align: middle; */
 }
 form div.MultiSelectionWidget > ul > li.removed {
     color: red;
@@ -265,7 +272,7 @@ form div.MultiSelectionWidget > ul > li.added {
        ==================== */
     nav a {
         float: left;
-        width: 3em;
+        width: 5em;
         margin: 0 1.7%;
         padding: 25px 2%;
     }
@@ -363,13 +370,8 @@ form div.MultiSelectionWidget > ul > li.added {
     content: " ";
     display: table;
 }
-
 .clearfix:after {
     clear: both;
-}
-
-.clearfix {
-    *zoom: 1;
 }
 
 /* ==========================================================================

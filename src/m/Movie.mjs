@@ -1,6 +1,6 @@
 /**
  * @fileOverview  The model class Movie with attribute definitions and storage management methods
- * @author Gerd Wagner
+ * @actor Gerd Wagner
  * @copyright Copyright 2013-2014 Gerd Wagner, Chair of Internet Technology, Brandenburg University of Technology, Germany.
  * @license This code is licensed under The Code Project Open License (CPOL), implying that the code is provided "as-is",
  * can be modified to create derivative works, can be redistributed, and can be used in commercial applications.
@@ -21,20 +21,28 @@ import {
 } from "../../lib/errorTypes.mjs";
 import {formatDate} from "../../lib/myUtil.mjs";
 import Enumeration from "../../lib/Enumeration.mjs";
+import Person from "./Person.mjs";
 
 /**
  * Define three Enumerations
  */
-const MovieRatingEL = new Enumeration({"G":"General Audiences", "PG":"Parental Guidance",
-    "PG13":"Not Under 13","R":"Restricted", "NC17":"Not Under 17"});
-const GenreEL = new Enumeration(["Action","Animation", "Comedy","Documentary", "Drama", "Family", "Film-Noir", "Horror", "Musical", "Romance"]);
+const MovieRatingEL = new Enumeration({
+    "G": "General Audiences", "PG": "Parental Guidance",
+    "PG13": "Not Under 13", "R": "Restricted", "NC17": "Not Under 17"
+});
+const GenreEL = new Enumeration(["Action", "Animation", "Comedy", "Documentary", "Drama", "Family", "Film-Noir", "Horror", "Musical", "Romance"]);
+
 class Movie {
-    constructor({movieId, title, releaseDate, movieRating, genres}) {
+    // constructor({movieId, title, releaseDate, movieRating, genres, director, directorId, actors, actorIdRefs}) {
+    constructor({movieId, title, movieRating, genres, director, directorId, actors, actorIdRefs}) {
+        console.log(movieId + " " + director + " " + directorId + " " + actors + " " + actorIdRefs)
         this.movieId = movieId
         this.title = title
-        this.releaseDate = releaseDate
+        // this.releaseDate = releaseDate
         this.movieRating = movieRating;
         this.genres = genres;
+        this.actors = actors || actorIdRefs;
+        this.director = director || directorId;
     }
 
     /*********************************************************
@@ -113,21 +121,23 @@ class Movie {
     }
 
     static checkGenres(genres) {
-        if (!genres || (Array.isArray(genres) && genres.length === 0)) {
-            return new MandatoryValueConstraintViolation("at least one genre has to be provided!")
-        } else if (!Array.isArray(genres)) {
-            return new RangeConstraintViolation(
-                "The value of genres must be a list/array!");
-        } else {
-            for (const i of genres.keys()) {
-                const validationResult = Movie.checkGenre(genres[i]);
-                if (!(validationResult instanceof NoConstraintViolation)) {
-                    return validationResult;
-                }
-            }
-            return new NoConstraintViolation();
-        }
+        return new NoConstraintViolation();
+        // if (!genres || (Array.isArray(genres) && genres.length === 0)) {
+        //     return new MandatoryValueConstraintViolation("at least one genre has to be provided!")
+        // } else if (!Array.isArray(genres)) {
+        //     return new RangeConstraintViolation(
+        //         "The value of genres must be a list/array!");
+        // } else {
+        //     for (const i of genres.keys()) {
+        //         const validationResult = Movie.checkGenre(genres[i]);
+        //         if (!(validationResult instanceof NoConstraintViolation)) {
+        //             return validationResult;
+        //         }
+        //     }
+        //     return new NoConstraintViolation();
+        // }
     }
+
     set genres(genres) {
         const validationResult = Movie.checkGenres(genres);
         if (validationResult instanceof NoConstraintViolation) {
@@ -153,6 +163,7 @@ class Movie {
         return new NoConstraintViolation();
 
     };
+
     set title(t) {
         let validationResult = Movie.checkTitle(t);
         if (validationResult instanceof NoConstraintViolation) {
@@ -165,18 +176,21 @@ class Movie {
     get title() {
         return this._title
     }
+
     static checkReleaseDate = function (y) {
-        const MIN_DATE = Date.parse("1895-12-28");
-        const MAX_DATE = new Date().setFullYear(new Date().getFullYear() + 1)
-        let date = Date.parse(y);
-        if (isNaN(date)) {
-            return new RangeConstraintViolation("The value of releaseDate must be a date!");
-        }
-        if (date < MIN_DATE || date > MAX_DATE) {
-            return new IntervalConstraintViolation(`The value of releaseDate must be between ${formatDate(MIN_DATE)} and next year!`);
-        }
         return new NoConstraintViolation();
+        // const MIN_DATE = Date.parse("1895-12-28");
+        // const MAX_DATE = new Date().setFullYear(new Date().getFullYear() + 1)
+        // let date = Date.parse(y);
+        // if (isNaN(date)) {
+        //     return new RangeConstraintViolation("The value of releaseDate must be a date!");
+        // }
+        // if (date < MIN_DATE || date > MAX_DATE) {
+        //     return new IntervalConstraintViolation(`The value of releaseDate must be between ${formatDate(MIN_DATE)} and next year!`);
+        // }
+        // return new NoConstraintViolation();
     };
+
     set releaseDate(y) {
         const validationResult = Movie.checkReleaseDate(y);
         if (validationResult instanceof NoConstraintViolation) {
@@ -190,6 +204,95 @@ class Movie {
         return this._releaseDate;
     }
 
+    get director() {
+        return this._director;
+    }
+
+    static checkDirector(publisher_id) {
+        var validationResult = null;
+        if (!publisher_id) {
+            validationResult = new NoConstraintViolation();  // optional
+        } else {
+            // invoke foreign key constraint check
+            validationResult = Person.checkNameAsIdRef(publisher_id);
+        }
+        return validationResult;
+    }
+
+    set director(p) {
+        if (!p) {  // unset director
+            delete this._director;
+        } else {
+            // p can be an ID reference or an object reference
+            const directorId = (typeof p !== "object") ? p : p.personId;
+            const validationResult = Movie.checkDirector(directorId);
+            if (validationResult instanceof NoConstraintViolation) {
+                // create the new director reference
+                this._director = Person.instances[directorId];
+            } else {
+                throw validationResult;
+            }
+        }
+    }
+
+    get actors() {
+        return this._actors;
+    }
+
+    static checkActor(actor_id) {
+        var validationResult = null;
+        if (!actor_id) {
+            // actor(s) are optional
+            validationResult = new NoConstraintViolation();
+        } else {
+            // invoke foreign key constraint check
+            validationResult = Person.checkPersonIdAsIdRef(actor_id);
+        }
+        return validationResult;
+    }
+
+    addActor(a) {
+        // a can be an ID reference or an object reference
+        const actor_id = (typeof a !== "object") ? parseInt(a) : a.personId;
+        if (actor_id) {
+            const validationResult = Movie.checkActor(actor_id);
+            if (actor_id && validationResult instanceof NoConstraintViolation) {
+                // add the new actor reference
+                const key = String(actor_id);
+                this._actors[key] = Person.instances[key];
+            } else {
+                throw validationResult;
+            }
+        }
+    }
+
+    removeActor(a) {
+        // a can be an ID reference or an object reference
+        const actor_id = (typeof a !== "object") ? parseInt(a) : a.personId;
+        if (actor_id) {
+            const validationResult = Movie.checkActor(actor_id);
+            if (validationResult instanceof NoConstraintViolation) {
+                // delete the actor reference
+                delete this._actors[String(actor_id)];
+            } else {
+                throw validationResult;
+            }
+        }
+    }
+
+    set actors(a) {
+        this._actors = {};
+        if (Array.isArray(a)) {  // array of IdRefs
+            for (const idRef of a) {
+                this.addActor(idRef);
+            }
+        } else {  // map of IdRefs to object references
+            for (const idRef of Object.keys(a)) {
+                this.addActor(a[idRef]);
+            }
+        }
+    }
+
     /*********************************************************
      ***  Other Instance-Level Methods  ***********************
      **********************************************************/
@@ -197,14 +300,15 @@ class Movie {
      *  Serialize movie object
      */
     toString() {
-        let movieStr = `Movie{ ID: ${this.movieId}, title: ${this.title}, movieRating: ${this.movieRating}, genres: ${this.genres.toString()}`;
+        let movieStr = `Movie{ ID: ${this.movieId}, title: ${this.title}, movieRating: ${this.movieRating}, director: ${this.director}, actors: ${this.actors}`;
+        if (this.genres) movieStr += `, genres: ${this.genres}`;
         if (this.releaseDate) movieStr += `, releaseDate: ${this.releaseDate}`;
         return movieStr;
     };
 
     toJSON() {  // is invoked by JSON.stringify
         const rec = {};
-        for (let p of Object.keys( this)) {
+        for (let p of Object.keys(this)) {
             // copy only property slots with underscore prefix
             if (p.charAt(0) === "_") {
                 // remove underscore prefix
@@ -220,7 +324,7 @@ class Movie {
  ***  Class-level ("static") properties  ******************
  **********************************************************/
 // initially an empty collection (in the form of a map)
-Movie.instances= {};
+Movie.instances = {};
 
 /*********************************************************
  ***  Class-level ("static") storage management methods ***
@@ -233,7 +337,7 @@ Movie.add = function (slots) {
     try {
         movie = new Movie(slots);
     } catch (e) {
-        console.log(`${e.constructor.name}: ${e.message}`);
+        console.log(e)
         movie = null;
     }
     if (movie) {
@@ -262,10 +366,10 @@ Movie.update = function (slots) {
             movie.movieRating = slots.movieRating;
             updatedProperties.push("movieRating");
         }
-        if (!movie.genres.isEqualTo( slots.genres)) {
-            movie.genres = slots.genres;
-            updatedProperties.push("genres");
-        }
+        // if (!movie.genres.isEqualTo(slots.genres)) {
+        //     movie.genres = slots.genres;
+        //     updatedProperties.push("genres");
+        // }
         // if (slots.edition && parseInt(slots.edition) !== movie.edition) {
         //     // slots.edition has a non-empty value that is new
         //     movie.setEdition(slots.edition);
@@ -276,7 +380,7 @@ Movie.update = function (slots) {
         //     updatedProperties.push("edition");
         // }
     } catch (e) {
-        console.log(`${e.constructor.name}: ${e.message}`);
+        console.log(e)
         noConstraintViolated = false;
         // restore object to its state before updating
         Movie.instances[slots.movieId] = objectBeforeUpdate;
@@ -308,7 +412,7 @@ Movie.convertRec2Obj = function (movieRow) {
     try {
         movie = new Movie(movieRow);
     } catch (e) {
-        console.log(`${e.constructor.name} while deserializing a movie row: ${e.message}`);
+        console.log(e);
     }
     return movie;
 };
