@@ -49,7 +49,7 @@ document.getElementById("RetrieveAndListAll")
             const row = tableBodyEl.insertRow();
             row.insertCell().textContent = movie.movieId;
             row.insertCell().textContent = movie.title;
-            row.insertCell().textContent = movie.year;
+            row.insertCell().textContent = movie.releaseDate;
             row.insertCell().appendChild(authListEl);
             // if the movie has a director, show its name
             row.insertCell().textContent =
@@ -86,7 +86,7 @@ createFormEl["commit"].addEventListener("click", function () {
     const slots = {
         movieId: createFormEl["movieId"].value,
         title: createFormEl["title"].value,
-        // year: createFormEl["year"].value,
+        releaseDate: createFormEl["releaseDate"].value,
         actorIdRefs: [],
         directorId: createFormEl["selectDirector"].value
     };
@@ -138,7 +138,7 @@ updSelMovieEl.addEventListener("change", function () {
         const movie = Movie.instances[movieId];
         updateFormEl["movieId"].value = movie.movieId;
         updateFormEl["title"].value = movie.title;
-        // updateFormEl["year"].value = movie.year;
+        updateFormEl["releaseDate"].value = movie.releaseDate;
         // set up the associated director selection list
         fillSelectWithOptions(selectDirectorEl, Person.instances, "personId", {displayProp: "name"});
         // set up the associated actors selection widget
@@ -167,7 +167,7 @@ updateFormEl["commit"].addEventListener("click", function () {
     const slots = {
         movieId: updateFormEl["movieId"].value,
         title: updateFormEl["title"].value,
-        year: updateFormEl["year"].value,
+        releaseDate: updateFormEl["releaseDate"].value,
         directorId: updateFormEl["selectDirector"].value
     };
     // add event listeners for responsive validation

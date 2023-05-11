@@ -33,12 +33,12 @@ const MovieRatingEL = new Enumeration({
 const GenreEL = new Enumeration(["Action", "Animation", "Comedy", "Documentary", "Drama", "Family", "Film-Noir", "Horror", "Musical", "Romance"]);
 
 class Movie {
-    // constructor({movieId, title, releaseDate, movieRating, genres, director, directorId, actors, actorIdRefs}) {
-    constructor({movieId, title, movieRating, genres, director, directorId, actors, actorIdRefs}) {
+    constructor({movieId, title, releaseDate, movieRating, genres, director, directorId, actors, actorIdRefs}) {
+    // constructor({movieId, title, movieRating, genres, director, directorId, actors, actorIdRefs}) {
         console.log(movieId + " " + director + " " + directorId + " " + actors + " " + actorIdRefs)
         this.movieId = movieId
         this.title = title
-        // this.releaseDate = releaseDate
+        this.releaseDate = releaseDate
         this.movieRating = movieRating;
         this.genres = genres;
         this.actors = actors || actorIdRefs;
@@ -178,17 +178,17 @@ class Movie {
     }
 
     static checkReleaseDate = function (y) {
-        return new NoConstraintViolation();
-        // const MIN_DATE = Date.parse("1895-12-28");
-        // const MAX_DATE = new Date().setFullYear(new Date().getFullYear() + 1)
-        // let date = Date.parse(y);
-        // if (isNaN(date)) {
-        //     return new RangeConstraintViolation("The value of releaseDate must be a date!");
-        // }
-        // if (date < MIN_DATE || date > MAX_DATE) {
-        //     return new IntervalConstraintViolation(`The value of releaseDate must be between ${formatDate(MIN_DATE)} and next year!`);
-        // }
         // return new NoConstraintViolation();
+        const MIN_DATE = Date.parse("1895-12-28");
+        const MAX_DATE = new Date().setFullYear(new Date().getFullYear() + 1)
+        let date = Date.parse(y);
+        if (isNaN(date)) {
+            return new RangeConstraintViolation("The value of releaseDate must be a date!");
+        }
+        if (date < MIN_DATE || date > MAX_DATE) {
+            return new IntervalConstraintViolation(`The value of releaseDate must be between ${formatDate(MIN_DATE)} and next year!`);
+        }
+        return new NoConstraintViolation();
     };
 
     set releaseDate(y) {
