@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Plain JS Validation App: Update</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <meta name="theme-color" content="#ffffff"/>
+    <link rel="icon" href="favicon.svg"/>
+    <link rel="mask-icon" href="mask-icon.svg" color="#000000"/>
+    <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<!--    <link rel="manifest" href="manifest.json"/>-->
+
+    <link rel="stylesheet" href="css/normalize.css"/>
+    <link rel="stylesheet" href="css/main.css"/>
+
+    <script src="lib/browserShims.js"></script>
+    <script src="src/v/updateMovie.mjs" type="module"></script>
+</head>
+<body>
+<header>
+    <div class="wrapper clearfix">
+        <div class="title">
+            <h1>Update a movie record</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="createMovie.html">C</a></li>
+                <li><a href="retrieveAndListAllMovies.html">R</a></li>
+                <li><a href="updateMovie.html">U</a></li>
+                <li><a href="deleteMovie.html">D</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<main>
+    <div class="wrapper clearfix">
+        <form id="Movie">
+            <div>
+                <label>Select movie:
+                    <select name="selectMovie">
+                        <option value=""> ---</option>
+                    </select>
+                </label>
+            </div>
+            <div><label>MovieId:
+                <output name="movieId"></output>
+            </label></div>
+            <div><label>Title: <input name="title" type="text"/></label></div>
+            <div><label>Release Date: <input name="releaseDate" type="text"/></label></div>
+            <fieldset data-bind="movieRating">
+                <legend>movie Rating</legend>
+            </fieldset>
+            <fieldset data-bind="genres">
+                <legend>Genres</legend>
+            </fieldset>
+            <div>
+                <button type="submit" name="commit">Save</button>
+            </div>
+        </form>
+        <a href="index.html">Back to main menu</a>
+    </div>
+</main>
+<footer>
+    <div class="foot-content wrapper">
+        Copyright © 2015-2021 Gerd Wagner,
+        <a rel="license" href="https://www.codeproject.com/info/cpol10.aspx">The Code Project Open License (CPOL)</a>.
+    </div>
+</footer>
+</body>
+</html>
