@@ -222,14 +222,22 @@ class Movie {
     set director(p) {
         if (!p) {  // unset director
             delete this._director;
+            // delete the corresponding inverse reference
+            delete this._director.moviesDirected[this._movieId];
         } else {
             // p can be an ID reference or an object reference
             const director_id = (typeof p !== "object") ? parseInt(p) : p.personId;
             const validationResult = Movie.checkDirector(director_id);
             if (validationResult instanceof NoConstraintViolation) {
+                if (this._director) {
+                    // delete the obsolete inverse reference
+                    delete this._director.moviesDirected[this._movieId];
+                }
                 // create the new director reference
                 const key = String(director_id)
                 this._director = Person.instances[key];
+                // add the new inverse reference
+                this._director.moviesDirected[this._movieId] = this;
             } else {
                 throw validationResult;
             }
@@ -261,6 +269,8 @@ class Movie {
                 // add the new actor reference
                 const key = String(actor_id);
                 this._actors[key] = Person.instances[key];
+                //add inverse reference
+                this._actors[key].moviesPlayed[this._movieId] = this;
             } else {
                 throw validationResult;
             }
@@ -273,6 +283,8 @@ class Movie {
         if (actor_id) {
             const validationResult = Movie.checkActor(actor_id);
             if (validationResult instanceof NoConstraintViolation) {
+                //delete inverse reference
+                delete this._actors[actor_id].moviesPlayed[this._movieId];
                 // delete the actor reference
                 delete this._actors[String(actor_id)];
             } else {

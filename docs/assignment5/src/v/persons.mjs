@@ -7,7 +7,7 @@
  ***************************************************************/
 import Person from "../m/Person.mjs";
 import Movie from "../m/Movie.mjs";
-import { fillSelectWithOptions } from "../../lib/util.mjs";
+import {createListFromMap, fillSelectWithOptions} from "../../lib/util.mjs";
 
 /***************************************************************
  Load data
@@ -48,6 +48,11 @@ document.getElementById("RetrieveAndListAll")
     const row = tableBodyEl.insertRow();
     row.insertCell().textContent = person.personId;
     row.insertCell().textContent = person.name;
+    // create list of books authored by this author
+    const listMoviesPlayed = createListFromMap(person.moviesPlayed, "title");
+    row.insertCell().appendChild(listMoviesPlayed);
+    const listMoviesDirected = createListFromMap(person.moviesDirected, "title");
+    row.insertCell().appendChild(listMoviesDirected);
   }
   document.getElementById("Person-M").style.display = "none";
   document.getElementById("Person-R").style.display = "block";

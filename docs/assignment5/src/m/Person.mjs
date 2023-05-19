@@ -23,6 +23,8 @@ class Person {
         // assign properties by invoking implicit setters
         this.personId = personId;  // number (integer)
         this.name = name;  // string
+        this._moviesPlayed = {}
+        this._moviesDirected = {}
     }
 
     get personId() {
@@ -97,31 +99,6 @@ class Person {
         }
     }
 
-    static checkNameAsId(n) {
-        var validationResult = Person.checkName(n);
-        if ((validationResult instanceof NoConstraintViolation)) {
-            if (!n) {
-                return new MandatoryValueConstraintViolation(
-                    "A publisher name is required!");
-            } else if (Publisher.instances[n]) {
-                return new UniquenessConstraintViolation(
-                    "There is already a publisher record with this name!");
-            }
-        }
-        return validationResult;
-    }
-
-    static checkNameAsIdRef(n) {
-        var validationResult = Person.checkName(n);
-        if ((validationResult instanceof NoConstraintViolation) && n) {
-            if (!Person.instances[n]) {
-                validationResult = new ReferentialIntegrityConstraintViolation(
-                    "There is no publisher record with this name!");
-            }
-        }
-        return validationResult;
-    }
-
     set name(n) {
         var constraintViolation = Person.checkName(n);
         if (constraintViolation instanceof NoConstraintViolation) {
@@ -131,11 +108,24 @@ class Person {
         }
     }
 
-    toJSON() {  // is invoked by JSON.stringify
+    get moviesPlayed() {
+        return this._moviesPlayed;
+    }
+
+    get moviesDirected() {
+        return this._moviesDirected
+    }
+
+
+    toJSON() {  // is invoked by JSON.stringify in Person.saveAll
         var rec = {};
-        for (const p of Object.keys(this)) {
-            // remove underscore prefix
-            if (p.charAt(0) === "_") rec[p.substr(1)] = this[p];
+        // loop over all Author properties
+        for (const p of Object.keys( this)) {
+            // keep underscore-prefixed properties except "_authoredBooks"
+            if (p.charAt(0) === "_" && p !== "_moviesPlayed" && p !== "_moviesDirected") {
+                // remove underscore prefix
+                rec[p.substr(1)] = this[p];
+            }
         }
         return rec;
     }
@@ -183,7 +173,7 @@ Person.update = function ({personId, name}) {
     if (noConstraintViolated) {
         if (updatedProperties.length > 0) {
             ending = updatedProperties.length > 1 ? "ies" : "y";
-            console.log(`Propert${ending} ${updatedProperties.toString()} modified for person ${name}`);
+            console.log(`Property${ending} ${updatedProperties.toString()} modified for person ${name}`);
         } else {
             console.log(`No property value changed for person ${name}!`);
         }
