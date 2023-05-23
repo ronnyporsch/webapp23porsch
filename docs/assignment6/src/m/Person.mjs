@@ -134,8 +134,8 @@ class Person {
 /****************************************************
  *** Class-level ("static") properties ***************
  *****************************************************/
-// initially an empty collection (in the form of a map)
-Person.instances = {};
+Person.instances = {}; // initially an empty collection (in the form of a map)
+Person.subtypes = []; // initially an empty collection (in the form of a list)
 
 /**********************************************************
  ***  Class-level ("static") storage management methods ***

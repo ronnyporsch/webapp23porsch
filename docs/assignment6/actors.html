@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>Unidirectional Association App: Manage Persons</title>
+  <title>Unidirectional Association App: Manage Actors</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="theme-color" content="#ffffff"/>
   <link rel="icon" href="favicon.svg"/>
@@ -11,7 +11,7 @@
 <!--  <link rel="manifest" href="manifest.json"/>-->
   <link rel="stylesheet" href="css/normalize.css"/>
   <link rel="stylesheet" href="css/main.css"/>
-  <script src="src/v/persons.mjs" type="module"></script>
+  <script src="src/v/actors.mjs" type="module"></script>
 </head>
 <body>
 <header>
@@ -36,31 +36,31 @@
 <main>
   <div class="wrapper clearfix">
     <!-- ======================================================= -->
-    <section id="Person-M" class="UI-Page">
+    <section id="Actor-M" class="UI-Page">
       <!-- ======================================================= -->
-      <h1>Manage person data</h1>
+      <h1>Manage actor data</h1>
       <ul class="menu">
         <li>
           <button type="button" id="RetrieveAndListAll">Retrieve/list all
-            person records
+            actor records
           </button>
         </li>
         <li>
-          <button type="button" id="Create">Create a new person record</button>
+          <button type="button" id="Create">Create a new actor record</button>
         </li>
         <li>
-          <button type="button" id="Update">Update an person record</button>
+          <button type="button" id="Update">Update an actor record</button>
         </li>
         <li>
-          <button type="button" id="Delete">Delete an person record</button>
+          <button type="button" id="Delete">Delete an actor record</button>
         </li>
       </ul>
       <div class="button"><a href="index.html">Back to Main menu</a></div>
     </section>
     <!-- ======================================================= -->
-    <section id="Person-R" class="UI-Page">
+    <section id="Actor-R" class="UI-Page">
       <!-- ======================================================= -->
-      <h1>Retrieve and list all person records</h1>
+      <h1>Retrieve and list all actor records</h1>
       <table>
         <thead>
         <tr>
@@ -77,9 +77,9 @@
       </div>
     </section>
     <!-- ======================================================= -->
-    <section id="Person-C" class="UI-Page">
+    <section id="Actor-C" class="UI-Page">
       <!-- ======================================================= -->
-      <h1>Create a new person record</h1>
+      <h1>Create a new actor record</h1>
       <form>
         <div class="field">
           <label>ID: <input type="text" name="personId"/></label>
@@ -94,12 +94,12 @@
       </form>
     </section>
     <!-- ======================================================= -->
-    <section id="Person-U" class="UI-Page">
+    <section id="Actor-U" class="UI-Page">
       <!-- ======================================================= -->
-      <h1>Update a person record</h1>
+      <h1>Update a actor record</h1>
       <form>
         <div class="select-one">
-          <label>Select person: <select name="selectPerson"></select></label>
+          <label>Select actor: <select name="selectActor"></select></label>
         </div>
         <div class="field">
           <label>ID:
@@ -116,12 +116,12 @@
       </form>
     </section>
     <!-- ======================================================= -->
-    <section id="Person-D" class="UI-Page">
+    <section id="Actor-D" class="UI-Page">
       <!-- ======================================================= -->
-      <h1>Delete a person record</h1>
+      <h1>Delete a actor record</h1>
       <form>
         <div class="select-one">
-          <label>Select person: <select name="selectPerson"></select></label>
+          <label>Select actor: <select name="selectActor"></select></label>
         </div>
         <div class="button-group">
           <button type="submit" name="commit">Delete</button>
