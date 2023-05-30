@@ -186,42 +186,39 @@ Person.update = function ({personId, name}) {
  */
 Person.destroy = function (personId) {
     const person = Person.instances[personId];
-    // delete all dependent movie records
-    for (const movieId of Object.keys(Movie.instances)) {
-        const movie = Movie.instances[movieId];
-        if (parseInt(personId) === movie.director?.personId) {
-            delete movie.director
-        }
-        if (personId in movie.actors) delete movie.actors[personId];
-        if (!movie.actors || Object.keys(movie.actors).length === 0) {
-            delete Movie.instances[movieId]
-        }
-    }
-    // delete the person object
     delete Person.instances[personId];
+    // also delete this person from subtype populations
+    for (const Subtype of Person.subtypes) {
+        if (personId in Subtype.instances) delete Subtype.instances[personId];
+    }
     console.log(`Person ${person.name} deleted.`);
 };
 /**
  *  Load all person records and convert them to objects
  */
 Person.retrieveAll = function () {
-    var persons = {};
-    if (!localStorage["persons"]) localStorage["persons"] = "{}";
+    var people = {};
+    if (!localStorage["people"]) localStorage["people"] = "{}";
     try {
-        persons = JSON.parse(localStorage["persons"]);
+        people = JSON.parse( localStorage["people"]);
     } catch (e) {
         console.log("Error when reading from Local Storage\n" + e);
-        persons = {};
     }
-    for (const key of Object.keys(persons)) {
-        try {
-            // convert record to (typed) object
-            Person.instances[key] = new Person(persons[key]);
+    for (const key of Object.keys( people)) {
+        try {  // convert record to (typed) object
+            Person.instances[key] = new Person( people[key]);
         } catch (e) {
             console.log(`${e.constructor.name} while deserializing person ${key}: ${e.message}`);
         }
     }
-    console.log(`${Object.keys(persons).length} person records loaded.`);
+    // add all instances of all subtypes to Person.instances
+    for (const Subtype of Person.subtypes) {
+        Subtype.retrieveAll();
+        for (const key of Object.keys( Subtype.instances)) {
+            Person.instances[key] = Subtype.instances[key];
+        }
+    }
+    console.log(`${Object.keys( Person.instances).length} Person records loaded.`);
 };
 /**
  *  Save all person objects as records

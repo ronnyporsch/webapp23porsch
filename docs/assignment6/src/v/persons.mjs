@@ -20,7 +20,7 @@ Movie.retrieveAll();
  ***************************************************************/
 // set up back-to-menu buttons for all use cases
 for (const btn of document.querySelectorAll("button.back-to-menu")) {
-  btn.addEventListener('click', function () {refreshManageDataUI();});
+  btn.addEventListener('click', refreshManageDataUI);
 }
 // neutralize the submit event for all use cases
 for (const frm of document.querySelectorAll("section > form")) {
@@ -32,8 +32,10 @@ for (const frm of document.querySelectorAll("section > form")) {
 // save data when leaving the page
 window.addEventListener("beforeunload", function () {
   Person.saveAll();
-  // also save movies because movies may be deleted when an person is deleted
-  Movie.saveAll();
+  // save all subtypes for persisting changes of supertype attributes
+  for (const Subtype of Person.subtypes) {
+    Subtype.saveAll();
+  }
 });
 
 /**********************************************
@@ -41,21 +43,23 @@ window.addEventListener("beforeunload", function () {
  **********************************************/
 document.getElementById("RetrieveAndListAll")
     .addEventListener("click", function () {
-  const tableBodyEl = document.querySelector("section#Person-R > table > tbody");
-  tableBodyEl.innerHTML = "";
-  for (const key of Object.keys( Person.instances)) {
-    const person = Person.instances[key];
-    const row = tableBodyEl.insertRow();
-    row.insertCell().textContent = person.personId;
-    row.insertCell().textContent = person.name;
-    // create list of books authored by this author
-    const listMoviesPlayed = createListFromMap(person.moviesPlayed, "title");
-    row.insertCell().appendChild(listMoviesPlayed);
-    const listMoviesDirected = createListFromMap(person.moviesDirected, "title");
-    row.insertCell().appendChild(listMoviesDirected);
-  }
-  document.getElementById("Person-M").style.display = "none";
-  document.getElementById("Person-R").style.display = "block";
+      const tableBodyEl = document.querySelector("section#Person-R > table > tbody");
+      // reset view table (drop its previous contents)
+      tableBodyEl.innerHTML = "";
+      // populate view table
+      for (const key of Object.keys(Person.instances)) {
+        const person = Person.instances[key];
+        const row = tableBodyEl.insertRow();
+        const roles = [];
+        row.insertCell().textContent = person.personId;
+        row.insertCell().textContent = person.name;
+        for (const Subtype of Person.subtypes) {
+          if (person.personId in Subtype.instances) roles.push( Subtype.name);
+        }
+        row.insertCell().textContent = roles.toString();
+      }
+      document.getElementById("Person-M").style.display = "none";
+      document.getElementById("Person-R").style.display = "block";
 });
 
 /**********************************************

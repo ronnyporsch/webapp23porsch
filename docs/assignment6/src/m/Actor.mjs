@@ -8,6 +8,7 @@
  */
 import Person from "./Person.mjs";
 import { cloneObject } from "../../lib/util.mjs";
+import Movie from "./Movie.mjs";
 
 /**
  * The class Actor
@@ -81,7 +82,15 @@ Actor.update = function ({personId, name}) {
  *  Delete an existing actor record
  */
 Actor.destroy = function (personId) {
+    console.log("trying to delete actor")
     const actor = Actor.instances[personId];
+    for (const movieId of Object.keys(Movie.instances)) {
+        const movie = Movie.instances[movieId];
+        if (personId in movie.actors) delete movie.actors[personId];
+        if (!movie.actors || Object.keys(movie.actors).length === 0) {
+            delete Movie.instances[movieId]
+        }
+    }
     delete Actor.instances[personId];
     console.log(`Actor ${actor.name} deleted.`);
 };
