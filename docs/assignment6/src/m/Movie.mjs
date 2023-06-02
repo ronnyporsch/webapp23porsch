@@ -22,6 +22,8 @@ import {
 import {formatDate} from "../../lib/myUtil.mjs";
 import Enumeration from "../../lib/Enumeration.mjs";
 import Person from "./Person.mjs";
+import Actor from "./Actor.mjs";
+import Director from "./Director.mjs";
 
 /**
  * Define three Enumerations
@@ -214,7 +216,7 @@ class Movie {
             validationResult = new NoConstraintViolation();  // optional
         } else {
             // invoke foreign key constraint check
-            validationResult = Person.checkPersonIdAsIdRef(director_id);
+            validationResult = Director.checkPersonIdAsIdRef(director_id);
         }
         return validationResult;
     }

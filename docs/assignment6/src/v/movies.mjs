@@ -9,12 +9,16 @@ import Person from "../m/Person.mjs";
 import Movie from "../m/Movie.mjs";
 import {fillSelectWithOptions, createListFromMap, createMultiSelectionWidget}
     from "../../lib/util.mjs";
+import Director from "../m/Director.mjs";
+import Actor from "../m/Actor.mjs";
 
 /***************************************************************
  Load data
  ***************************************************************/
 Person.retrieveAll();
 Movie.retrieveAll();
+// Director.retrieveAll();
+// Actor.retrieveAll();
 
 /***************************************************************
  Set up general, use-case-independent UI elements
